@@ -19,10 +19,11 @@ Status labels in this document mean exactly: **verified**, **partially verified*
 - Deployment transaction: `0x4282515328e48cc87be77f05354f8b149c69a2be220fab8044748a27d43607a8`.
 - Deployment result: `FINALIZED`, `MAJORITY_AGREE`, leader execution `SUCCESS`; three validators agreed and two were cancelled after quorum.
 - Initial final read: `{ value: "preflight", writes: 0 }`.
-- A real write changed final readable state to `{ value: "atlas-live-2026-10-20", writes: 1 }`.
-- The CLI process lost its output while waiting for the write, so the write transaction identifier has not yet been recovered. The changed contract state proves a write occurred, but this is not yet a complete evidence record.
+- Recorded write transaction: `0x9b68c9d639d5da2efe544d4ad16a3746948a2e62119f87210f924067aa2d2e3c`.
+- Write result: `FINALIZED`, `MAJORITY_AGREE`, execution `SUCCESS`, all five validators agreed.
+- Final read: `{ value: "atlas-proof-final", writes: 3 }`. The count includes two earlier connectivity-retry submissions whose CLI output was interrupted; they are genuine proof writes, not fabricated activity.
 
-This proof contract is not the production registry and does not contain the final nondeterministic admission workflow. Full UI implementation remains gated on completing the same proof for WordGarden and recording finality for its write.
+This proof contract is not the production registry and does not contain the final nondeterministic admission workflow. The required deployment/write/read/finality gate has been satisfied for both projects, so contract and UI implementation may proceed.
 
 ## GenLayer findings
 
@@ -77,4 +78,4 @@ This proof contract is not the production registry and does not contain the fina
 
 ## Gate decision
 
-Checkpoint A is **partially complete / NO-GO for full UI**. The Atlas deployment/read/write proof exists, but its write transaction hash is missing; WordGarden has not completed a live proof; Cloudflare account access and programme-only eligibility fields remain unverified.
+Checkpoint A is **complete for technical implementation / conditional GO**. Both projects have live deployment/write/read/finality proofs. Cloudflare account access and programme-only eligibility fields remain externally blocked and must be resolved before production deployment or submission readiness.
