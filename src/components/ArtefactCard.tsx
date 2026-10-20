@@ -1,0 +1,4 @@
+import {Link} from 'react-router-dom'; import type {Artefact} from '../types';
+function hash(s:string){let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0}
+export function islandStyle(a:Artefact){const h=hash(a.id||a.title);return {'--x':`${8+(h%76)}%`,'--y':`${12+((h>>>7)%68)}%`,'--r':`${-7+(h%15)}deg`,'--hue':`${235+(h%65)}`} as React.CSSProperties}
+export function ArtefactCard({artefact,spatial=false}:{artefact:Artefact;spatial?:boolean}){return <Link to={`/artefact/${artefact.id}`} className={spatial?'island':'record-card'} style={spatial?islandStyle(artefact):undefined}><span className="island-glow"/><span className="eyebrow">{artefact.category.replace('-',' ')}</span><h3>{artefact.title}</h3><p>{artefact.historical_context}</p><span className={`status ${artefact.assessment_status.toLowerCase()}`}>{artefact.assessment_status}</span></Link>}

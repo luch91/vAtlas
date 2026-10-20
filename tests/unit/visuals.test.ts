@@ -1,0 +1,3 @@
+import {describe,expect,it} from 'vitest';import {islandStyle} from '../../src/components/ArtefactCard';import type {Artefact} from '../../src/types';
+const record={id:'abc123',title:'A lost place',category:'community',historical_context:'context',assessment_status:'ACCEPTED'} as Artefact;
+describe('deterministic atlas placement',()=>{it('returns identical coordinates for the same record',()=>{expect(islandStyle(record)).toEqual(islandStyle({...record}))});it('keeps coordinates in bounded percentages',()=>{const s=islandStyle(record) as Record<string,string>;expect(parseInt(s['--x'])).toBeGreaterThanOrEqual(8);expect(parseInt(s['--x'])).toBeLessThanOrEqual(83)})});

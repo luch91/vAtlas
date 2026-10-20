@@ -1,8 +1,9 @@
 node_modules/
 dist/
 .env
-.env.*
-!.env.example
-test-results/
 playwright-report/
-*.log
+test-results/
+contracts/__pycache__/
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
