@@ -1188,7 +1188,6 @@ footer {
     transition: none !important;
   }
 }
-+
 /* Gate A layered scene v2 */
 .layered-world .world-stage {
   background: #161544;
@@ -1348,5 +1347,88 @@ footer {
   .object-plane {
     transition: none !important;
     animation: none !important;
+  }
+}
+/* Experiential correction */
+.layered-world .world-title {
+  max-width: min(440px, 34vw);
+  pointer-events: none;
+}
+.layered-world .world-title h1 {
+  font-size: clamp(2.2rem, 3.7vw, 3.8rem);
+  line-height: 0.92;
+}
+.discovery-panel {
+  position: absolute;
+  right: 5rem;
+  bottom: 1.5rem;
+  padding: 1.25rem;
+  max-width: 390px;
+  max-height: min(58vh, 520px);
+  overflow: auto;
+  z-index: 30;
+}
+.discovery-panel .assessment-note {
+  font-size: 0.78rem;
+  opacity: 0.78;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  padding-top: 0.65rem;
+}
+.discovery-panel small {
+  display: block;
+  margin: 0.5rem 0 1rem;
+  opacity: 0.72;
+}
+.discovery-panel .enter-exhibit {
+  display: inline-flex;
+  text-decoration: none;
+}
+.live-minimap span {
+  transform: none !important;
+  translate: 0 0 !important;
+}
+.island-object::after {
+  content: "";
+  position: absolute;
+  left: 15%;
+  right: 15%;
+  bottom: 38px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(119, 91, 255, 0.35);
+  filter: blur(9px);
+  z-index: -1;
+}
+.record-island::after {
+  background: #ffb35c;
+  box-shadow: 0 0 22px #b983ff;
+}
+.atlas-haze::after {
+  content: "";
+  position: absolute;
+  inset: 20%;
+  background: radial-gradient(
+    ellipse,
+    rgba(255, 165, 94, 0.13),
+    transparent 65%
+  );
+}
+@media (max-width: 700px) {
+  .layered-world .world-title {
+    max-width: 70%;
+    top: 1rem;
+  }
+  .layered-world .world-title h1 {
+    font-size: clamp(1.75rem, 8vw, 2.65rem);
+  }
+  .discovery-panel {
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 5.8rem;
+    max-width: none;
+    max-height: 42vh;
+  }
+  .world-status {
+    display: none;
   }
 }

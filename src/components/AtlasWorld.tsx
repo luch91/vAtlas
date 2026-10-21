@@ -1,6 +1,6 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Compass, LocateFixed, Minus, Plus, Sparkles } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import type { Artefact } from "../types";
 type Camera = { x: number; y: number; scale: number };
 const WORLD = { w: 1800, h: 1050 };
@@ -13,6 +13,44 @@ const islands = [
   ["Lost platforms", 1100, 730, 2],
   ["Portal ruins", 470, 810, 5],
 ] as const;
+const discoveries = [
+  {
+    title: "Early web",
+    eyebrow: "Editorial trail · beginnings",
+    body: "Hand-built pages, guestbooks and blinking experiments made publishing feel personal. Follow this trail toward the earliest documented artefacts.",
+    tone: "Signal: modem dawn",
+  },
+  {
+    title: "Communities",
+    eyebrow: "Editorial trail · gathering",
+    body: "Forums, fan pages and chat rooms turned distant strangers into communities before social feeds consolidated the web.",
+    tone: "Signal: many voices",
+  },
+  {
+    title: "Creative works",
+    eyebrow: "Editorial trail · expression",
+    body: "Loops, pixel art and playful experiments travelled because people copied, remixed and remembered them.",
+    tone: "Signal: remix culture",
+  },
+  {
+    title: "Tools & protocols",
+    eyebrow: "Editorial trail · infrastructure",
+    body: "Browsers, formats and protocols quietly shaped what could be made, shared and eventually lost.",
+    tone: "Signal: machines speaking",
+  },
+  {
+    title: "Lost platforms",
+    eyebrow: "Editorial trail · absence",
+    body: "Services disappear; their cultural traces survive unevenly in screenshots, memories and surviving links.",
+    tone: "Signal: fading network",
+  },
+  {
+    title: "Portal ruins",
+    eyebrow: "Editorial trail · recovery",
+    body: "A threshold for nominations that have evidence but still need careful, honest assessment.",
+    tone: "Signal: awaiting discovery",
+  },
+];
 export function AtlasWorld({
   entries,
   loading,
@@ -22,13 +60,23 @@ export function AtlasWorld({
   loading: boolean;
   error: string;
 }) {
-  const nav = useNavigate(),
-    stage = useRef<HTMLDivElement>(null),
+  const stage = useRef<HTMLDivElement>(null),
     pts = useRef(new Map<number, { x: number; y: number }>()),
     g = useRef({ cx: 0, cy: 0, x: 0, y: 0, dist: 0 });
   const [cam, setCam] = useState<Camera>({ x: 0, y: 0, scale: 1 }),
     [selected, setSelected] = useState(""),
-    [hint, setHint] = useState(true);
+    [hint, setHint] = useState(true),
+    [view, setView] = useState({ w: 1, h: 1 });
+  useEffect(() => {
+    const el = stage.current;
+    if (!el) return;
+    const update = () => setView({ w: el.clientWidth, h: el.clientHeight });
+    update();
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   const accepted = entries.filter((e) => e.assessment_status === "ACCEPTED"),
     record = accepted.find((e) => e.id === selected),
     records = useMemo(
@@ -62,7 +110,11 @@ export function AtlasWorld({
       });
     });
   function down(e: React.PointerEvent) {
-    try { stage.current?.setPointerCapture(e.pointerId); } catch { /* synthetic touch */ }
+    try {
+      stage.current?.setPointerCapture(e.pointerId);
+    } catch {
+      /* synthetic touch */
+    }
     pts.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     g.current = { cx: cam.x, cy: cam.y, x: e.clientX, y: e.clientY, dist: 0 };
     setHint(false);
@@ -90,16 +142,18 @@ export function AtlasWorld({
   function up(e: React.PointerEvent) {
     pts.current.delete(e.pointerId);
     g.current.dist = 0;
+    const remaining = [...pts.current.values()][0];
+    if (remaining)
+      g.current = {
+        cx: cam.x,
+        cy: cam.y,
+        x: remaining.x,
+        y: remaining.y,
+        dist: 0,
+      };
   }
-  const focus = (x: number, y: number, id: string) => {
+  const focus = (_x: number, _y: number, id: string) => {
       setSelected(id);
-      setCam(
-        bound({
-          scale: 1.5,
-          x: (WORLD.w / 2 - x) * 1.5,
-          y: (WORLD.h / 2 - y) * 1.5,
-        }),
-      );
     },
     tr = (d: number) =>
       `translate3d(${cam.x * d}px,${cam.y * d}px,0) scale(${1 + (cam.scale - 1) * d})`;
@@ -132,6 +186,7 @@ export function AtlasWorld({
             setCam((c) => bound({ ...c, x: c.x - d }));
           if (e.key === "ArrowUp") setCam((c) => bound({ ...c, y: c.y + d }));
           if (e.key === "ArrowDown") setCam((c) => bound({ ...c, y: c.y - d }));
+          if (e.key === "Escape") setSelected("");
         }}
       >
         <div
@@ -223,9 +278,10 @@ export function AtlasWorld({
           ))}
           <span
             style={{
-              width: `${Math.min(92, 100 / cam.scale)}%`,
-              height: `${Math.min(88, 100 / cam.scale)}%`,
-              transform: `translate(calc(-50% + ${-cam.x / 18}px),calc(-50% + ${-cam.y / 14}px))`,
+              width: `${clamp((view.w / (WORLD.w * cam.scale)) * 100, 4, 100)}%`,
+              height: `${clamp((view.h / (WORLD.h * cam.scale)) * 100, 4, 100)}%`,
+              left: `${clamp(((WORLD.w / 2 - view.w / (2 * cam.scale) - cam.x / cam.scale) / WORLD.w) * 100, 0, 100)}%`,
+              top: `${clamp(((WORLD.h / 2 - view.h / (2 * cam.scale) - cam.y / cam.scale) / WORLD.h) * 100, 0, 100)}%`,
             }}
           />
         </button>
@@ -248,22 +304,46 @@ export function AtlasWorld({
             been staged for display.
           </p>
         )}
-        {record && (
-          <article className="world-preview">
+        {(record || selected.startsWith("d")) && (
+          <article
+            className="world-preview discovery-panel"
+            onPointerDown={(e) => e.stopPropagation()}
+          >
             <button onClick={() => setSelected("")} aria-label="Close preview">
               ×
             </button>
-            <span>
-              {record.assessment_status} · {record.category}
-            </span>
-            <h2>{record.title}</h2>
-            <p>{record.historical_context}</p>
-            <button
-              className="enter-exhibit"
-              onClick={() => nav(`/artefact/${record.id}`)}
-            >
-              Enter exhibit →
-            </button>
+            {record ? (
+              <>
+                <span>
+                  {record.assessment_status} · {record.category} · GenLayer
+                </span>
+                <h2>{record.title}</h2>
+                <p>{record.historical_context}</p>
+                <p className="assessment-note">{record.assessment_reason}</p>
+                <Link
+                  className="enter-exhibit"
+                  to={`/artefact/${record.id}`}
+                  onPointerDown={(e) => e.stopPropagation()}
+                >
+                  Enter exhibit →
+                </Link>
+              </>
+            ) : (
+              (() => {
+                const d = discoveries[Number(selected.slice(1))];
+                return (
+                  <>
+                    <span>{d.eyebrow}</span>
+                    <h2>{d.title}</h2>
+                    <p>{d.body}</p>
+                    <small>{d.tone}</small>
+                    <Link className="enter-exhibit" to="/ledger">
+                      Browse verified records →
+                    </Link>
+                  </>
+                );
+              })()
+            )}
           </article>
         )}
       </div>
