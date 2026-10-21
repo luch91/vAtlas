@@ -6,4 +6,6 @@ Read-only browsing works without a wallet. The production UI uses injected EIP-1
 
 Cloudflare project `vatlas` is Git-connected Pages (GitHub `luch91/vAtlas`), not a standalone Worker. Production and preview variables both select contract `0x4ADf...aa29` on StudioNet.
 
+Authenticated Cloudflare reconciliation found deployment `c4aaeafb-1b68-4ee4-a914-37500b693bcf` serving merge commit `df4bb16beb435af6b45fc9b43d60acaddf04e2da`. The GitHub `main` branch and production deployment were synchronized at the time of the QA snapshot. A documentation-only merge after this snapshot is expected to produce a newer deployment.
+
 Decision: **GO for owner review; NO-GO for automatic submission until owner approval and account-specific portal capacity are confirmed.**
