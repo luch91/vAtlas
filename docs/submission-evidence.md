@@ -15,6 +15,6 @@ Status: **technically ready for owner review; official submission not authorised
 - Verified production QA snapshot: deployment `c4aaeafb-1b68-4ee4-a914-37500b693bcf`, commit `df4bb16beb435af6b45fc9b43d60acaddf04e2da` (the final documentation merge may produce a newer deployment, reported in the delivery summary).
 - Production HTTP verification: `/`, `/ledger`, and the accepted artefact deep link returned `200 text/html`; authoritative contract state was read separately with `list_entries(0, 25, true)`.
 
-Eligibility: the official programme API permits StudioNet for new projects and the Projects category permits at most two submissions per Monday–Sunday UTC week, resetting Monday 00:00 UTC. Bradbury is not mandatory. Existing deployments are accepted subject to evidence and review. Account-specific remaining capacity requires an authenticated portal session, and steward/AI review still applies. Rebranding is not prohibited, but repository, deployment and contract evidence must remain consistent.
+Programme operations: the Projects category permits at most two submissions per Monday–Sunday UTC week, resetting Monday 00:00 UTC. Existing deployments remain subject to evidence and review. Account-specific remaining capacity requires an authenticated portal session, and steward/AI review still applies. Rebranding is not prohibited, but repository, deployment and contract evidence must remain consistent.
 
 No identifiers or results are invented. Owner approval and an authenticated account-capacity check are required before submission.
