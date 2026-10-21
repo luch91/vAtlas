@@ -19,7 +19,8 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  background: radial-gradient(circle at 80% 5%, #eee4ff 0, transparent 25rem),
+  background:
+    radial-gradient(circle at 80% 5%, #eee4ff 0, transparent 25rem),
     var(--paper);
 }
 a {
@@ -257,7 +258,8 @@ p {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(#ffffff40 1px, transparent 1px),
+  background-image:
+    linear-gradient(#ffffff40 1px, transparent 1px),
     linear-gradient(90deg, #ffffff40 1px, transparent 1px);
   background-size: 50px 50px;
   pointer-events: none;
@@ -1184,5 +1186,167 @@ footer {
   .world-preview {
     animation: none !important;
     transition: none !important;
+  }
+}
++
+/* Gate A layered scene v2 */
+.layered-world .world-stage {
+  background: #161544;
+  overflow: hidden;
+}
+.depth-plane {
+  position: absolute;
+  inset: -12%;
+  width: 124%;
+  height: 124%;
+  pointer-events: none;
+  transform-origin: center;
+  transition: transform 0.12s linear;
+}
+.atlas-sky {
+  background: url("/atlas-world.jpg") center/cover;
+  filter: blur(3px) saturate(0.72) brightness(0.42);
+}
+.atlas-haze {
+  background: radial-gradient(
+    circle at 50% 60%,
+    transparent 10%,
+    rgba(111, 73, 202, 0.22) 40%,
+    rgba(9, 10, 46, 0.5) 75%
+  );
+  mix-blend-mode: screen;
+}
+.object-plane {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -900px;
+  margin-top: -525px;
+  transform-origin: center;
+  transition: transform 0.12s linear;
+}
+.scene-object {
+  position: absolute;
+  width: 310px;
+  height: 285px;
+  transform: translate(-50%, -50%);
+  border: 0;
+  background: none;
+  color: white;
+  cursor: pointer;
+  filter: drop-shadow(0 28px 28px rgba(4, 4, 28, 0.72));
+  transition:
+    filter 0.35s,
+    translate 0.35s,
+    scale 0.35s;
+  z-index: 2;
+}
+.scene-object .sprite {
+  position: absolute;
+  inset: 0;
+  background: url("/atlas-objects.png") no-repeat;
+  background-size: 300% 200%;
+  pointer-events: none;
+}
+.sprite-0 {
+  background-position: 0 0 !important;
+}
+.sprite-1 {
+  background-position: 50% 0 !important;
+}
+.sprite-2 {
+  background-position: 100% 0 !important;
+}
+.sprite-3 {
+  background-position: 0 100% !important;
+}
+.sprite-4 {
+  background-position: 50% 100% !important;
+}
+.sprite-5 {
+  background-position: 100% 100% !important;
+}
+.scene-object span,
+.scene-object small {
+  position: absolute;
+  left: 50%;
+  translate: -50% 0;
+  white-space: nowrap;
+  border-radius: 999px;
+  background: rgba(12, 10, 43, 0.82);
+  backdrop-filter: blur(12px);
+  padding: 0.4rem 0.8rem;
+  box-shadow: 0 8px 30px #080623;
+}
+.scene-object span {
+  bottom: 23px;
+  font: 600 1.05rem Georgia;
+}
+.scene-object small {
+  bottom: -8px;
+  font-size: 0.62rem;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.scene-object:hover,
+.scene-object:focus-visible,
+.scene-object.is-selected {
+  scale: 1.1;
+  translate: 0 -18px;
+  filter: drop-shadow(0 35px 35px rgba(4, 4, 28, 0.85))
+    drop-shadow(0 0 25px #ff9d55);
+}
+.scene-object:hover small,
+.scene-object:focus-visible small,
+.scene-object.is-selected small {
+  opacity: 1;
+}
+.record-island {
+  filter: drop-shadow(0 28px 28px #080526) drop-shadow(0 0 18px #b982ff);
+}
+.foreground-clouds {
+  background: linear-gradient(
+    180deg,
+    transparent 72%,
+    rgba(171, 121, 255, 0.26)
+  );
+  filter: blur(12px);
+}
+.live-minimap {
+  background: rgba(10, 10, 42, 0.86) !important;
+}
+.live-minimap i {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ffab62;
+  box-shadow: 0 0 8px #fff;
+}
+.live-minimap span {
+  position: absolute !important;
+  left: 50%;
+  top: 50%;
+  border: 1px solid #e8d8ff !important;
+  background: rgba(160, 126, 255, 0.12) !important;
+}
+@media (max-width: 600px) {
+  .scene-object {
+    width: 230px;
+    height: 215px;
+  }
+  .object-plane {
+    scale: 0.78;
+  }
+  .world-title {
+    pointer-events: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene-object,
+  .depth-plane,
+  .object-plane {
+    transition: none !important;
+    animation: none !important;
   }
 }

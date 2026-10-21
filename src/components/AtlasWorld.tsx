@@ -3,40 +3,16 @@ import { Compass, LocateFixed, Minus, Plus, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { Artefact } from "../types";
 type Camera = { x: number; y: number; scale: number };
-const regions = [
-  {
-    name: "Communities",
-    x: 29,
-    y: 29,
-    note: "Decorative region · gathering places",
-  },
-  {
-    name: "Creative works",
-    x: 48,
-    y: 18,
-    note: "Decorative region · vanished makers",
-  },
-  {
-    name: "Tools & protocols",
-    x: 70,
-    y: 29,
-    note: "Decorative region · machines of the web",
-  },
-  {
-    name: "Lost platforms",
-    x: 82,
-    y: 51,
-    note: "Decorative region · pathways awaiting records",
-  },
-  {
-    name: "Early web",
-    x: 17,
-    y: 55,
-    note: "Decorative region · bright beginnings",
-  },
-];
-const clamp = (n: number, min: number, max: number) =>
-  Math.min(max, Math.max(min, n));
+const WORLD = { w: 1800, h: 1050 };
+const clamp = (n: number, a: number, b: number) => Math.min(b, Math.max(a, n));
+const islands = [
+  ["Early web", 330, 570, 0],
+  ["Communities", 690, 315, 3],
+  ["Creative works", 1010, 300, 1],
+  ["Tools & protocols", 1390, 525, 4],
+  ["Lost platforms", 1100, 730, 2],
+  ["Portal ruins", 470, 810, 5],
+] as const;
 export function AtlasWorld({
   entries,
   loading,
@@ -46,75 +22,89 @@ export function AtlasWorld({
   loading: boolean;
   error: string;
 }) {
-  const navigate = useNavigate(),
+  const nav = useNavigate(),
     stage = useRef<HTMLDivElement>(null),
-    pointers = useRef(new Map<number, { x: number; y: number }>()),
-    drag = useRef({ x: 0, y: 0, cx: 0, cy: 0, distance: 0 });
-  const [camera, setCamera] = useState<Camera>({ x: 0, y: 0, scale: 1 }),
+    pts = useRef(new Map<number, { x: number; y: number }>()),
+    g = useRef({ cx: 0, cy: 0, x: 0, y: 0, dist: 0 });
+  const [cam, setCam] = useState<Camera>({ x: 0, y: 0, scale: 1 }),
     [selected, setSelected] = useState(""),
     [hint, setHint] = useState(true);
   const accepted = entries.filter((e) => e.assessment_status === "ACCEPTED"),
-    record = accepted.find((e) => e.id === selected);
-  const markers = useMemo(
-    () =>
-      accepted.map((entry, i) => ({
-        entry,
-        x: 44 + (i % 3) * 9,
-        y: 55 + Math.floor(i / 3) * 8,
-      })),
-    [accepted],
-  );
-  const setScale = (n: number) =>
-    setCamera((c) => ({ ...c, scale: clamp(n, 0.82, 2.35) }));
+    record = accepted.find((e) => e.id === selected),
+    records = useMemo(
+      () =>
+        accepted.map((entry, i) => ({
+          entry,
+          x: 900 + (i % 3) * 210,
+          y: 560 + Math.floor(i / 3) * 180,
+          s: i % 6,
+        })),
+      [accepted],
+    );
+  const bound = (c: Camera) => {
+    const r = stage.current?.getBoundingClientRect();
+    if (!r) return c;
+    const mx = Math.max(0, (WORLD.w * c.scale - r.width) / 2),
+      my = Math.max(0, (WORLD.h * c.scale - r.height) / 2);
+    return { ...c, x: clamp(c.x, -mx, mx), y: clamp(c.y, -my, my) };
+  };
+  const zoomAt = (z: number, x: number, y: number) =>
+    setCam((c) => {
+      const r = stage.current?.getBoundingClientRect();
+      if (!r) return c;
+      const s = clamp(z, 0.72, 2.25),
+        px = x - r.left - r.width / 2,
+        py = y - r.top - r.height / 2;
+      return bound({
+        scale: s,
+        x: px - ((px - c.x) * s) / c.scale,
+        y: py - ((py - c.y) * s) / c.scale,
+      });
+    });
   function down(e: React.PointerEvent) {
     stage.current?.setPointerCapture(e.pointerId);
-    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    drag.current = {
-      x: e.clientX,
-      y: e.clientY,
-      cx: camera.x,
-      cy: camera.y,
-      distance: 0,
-    };
+    pts.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    g.current = { cx: cam.x, cy: cam.y, x: e.clientX, y: e.clientY, dist: 0 };
     setHint(false);
   }
   function move(e: React.PointerEvent) {
-    if (!pointers.current.has(e.pointerId)) return;
-    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    const p = [...pointers.current.values()];
+    if (!pts.current.has(e.pointerId)) return;
+    pts.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const p = [...pts.current.values()];
     if (p.length === 2) {
-      const d = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
-      if (drag.current.distance)
-        setScale((camera.scale * d) / drag.current.distance);
-      drag.current.distance = d;
+      const d = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y),
+        x = (p[0].x + p[1].x) / 2,
+        y = (p[0].y + p[1].y) / 2;
+      if (g.current.dist) zoomAt((cam.scale * d) / g.current.dist, x, y);
+      g.current.dist = d;
       return;
     }
-    setCamera((c) => ({
-      ...c,
-      x: clamp(drag.current.cx + e.clientX - drag.current.x, -560, 560),
-      y: clamp(drag.current.cy + e.clientY - drag.current.y, -260, 260),
-    }));
+    setCam((c) =>
+      bound({
+        ...c,
+        x: g.current.cx + e.clientX - g.current.x,
+        y: g.current.cy + e.clientY - g.current.y,
+      }),
+    );
   }
   function up(e: React.PointerEvent) {
-    pointers.current.delete(e.pointerId);
-    drag.current.distance = 0;
+    pts.current.delete(e.pointerId);
+    g.current.dist = 0;
   }
-  function focus(x: number, y: number, id = "") {
-    setSelected(id);
-    setCamera({ x: (50 - x) * 8, y: (48 - y) * 5, scale: 1.45 });
-    setHint(false);
-  }
-  function key(e: React.KeyboardEvent) {
-    const d = 32;
-    if (e.key === "ArrowLeft") setCamera((c) => ({ ...c, x: c.x + d }));
-    if (e.key === "ArrowRight") setCamera((c) => ({ ...c, x: c.x - d }));
-    if (e.key === "ArrowUp") setCamera((c) => ({ ...c, y: c.y + d }));
-    if (e.key === "ArrowDown") setCamera((c) => ({ ...c, y: c.y - d }));
-    if (e.key === "+" || e.key === "=") setScale(camera.scale + 0.15);
-    if (e.key === "-") setScale(camera.scale - 0.15);
-  }
+  const focus = (x: number, y: number, id: string) => {
+      setSelected(id);
+      setCam(
+        bound({
+          scale: 1.5,
+          x: (WORLD.w / 2 - x) * 1.5,
+          y: (WORLD.h / 2 - y) * 1.5,
+        }),
+      );
+    },
+    tr = (d: number) =>
+      `translate3d(${cam.x * d}px,${cam.y * d}px,0) scale(${1 + (cam.scale - 1) * d})`;
   return (
-    <section className="world-shell">
+    <section className="world-shell layered-world">
       <div className="world-title">
         <span>THE LIVING ARCHIPELAGO</span>
         <h1>Explore the old internet the web almost forgot.</h1>
@@ -123,89 +113,119 @@ export function AtlasWorld({
         ref={stage}
         className="world-stage"
         tabIndex={0}
-        onKeyDown={key}
         onPointerDown={down}
         onPointerMove={move}
         onPointerUp={up}
         onPointerCancel={up}
         onWheel={(e) => {
           e.preventDefault();
-          setScale(camera.scale + (e.deltaY < 0 ? 0.12 : -0.12));
-          setHint(false);
+          zoomAt(
+            cam.scale + (e.deltaY < 0 ? 0.12 : -0.12),
+            e.clientX,
+            e.clientY,
+          );
+        }}
+        onKeyDown={(e) => {
+          const d = 50;
+          if (e.key === "ArrowLeft") setCam((c) => bound({ ...c, x: c.x + d }));
+          if (e.key === "ArrowRight")
+            setCam((c) => bound({ ...c, x: c.x - d }));
+          if (e.key === "ArrowUp") setCam((c) => bound({ ...c, y: c.y + d }));
+          if (e.key === "ArrowDown") setCam((c) => bound({ ...c, y: c.y - d }));
         }}
       >
         <div
-          className="atlas-scene"
+          className="depth-plane atlas-sky"
+          style={{ transform: tr(0.12) }}
+        />
+        <div
+          className="depth-plane atlas-haze"
+          style={{ transform: tr(0.28) }}
+        />
+        <div
+          className="object-plane atlas-scene"
           style={{
-            transform: `translate3d(${camera.x}px,${camera.y}px,0) scale(${camera.scale})`,
+            width: WORLD.w,
+            height: WORLD.h,
+            transform: `translate3d(${cam.x}px,${cam.y}px,0) scale(${cam.scale})`,
           }}
         >
-          <img
-            src="/atlas-world.jpg"
-            alt="A luminous archipelago of floating islands above violet clouds"
-            draggable={false}
-          />
-          <div className="atmosphere" aria-hidden="true" />
-          {regions.map((r, i) => (
+          {islands.map(([name, x, y, s], i) => (
             <button
-              key={r.name}
-              className={`region-marker region-${i}`}
-              style={{ left: `${r.x}%`, top: `${r.y}%` }}
+              key={name}
+              className={`scene-object island-object ${selected === `d${i}` ? "is-selected" : ""}`}
+              style={{ left: x, top: y }}
               onPointerDown={(e) => e.stopPropagation()}
-              onClick={() => focus(r.x, r.y)}
+              onClick={() => focus(x, y, `d${i}`)}
             >
-              <span>{r.name}</span>
-              <small>{r.note}</small>
+              <i className={`sprite sprite-${s}`} />
+              <span>{name}</span>
+              <small>Interpretive scenery</small>
             </button>
           ))}
-          {markers.map(({ entry, x, y }) => (
+          {records.map(({ entry, x, y, s }) => (
             <button
               key={entry.id}
-              className="record-beacon"
-              style={{ left: `${x}%`, top: `${y}%` }}
+              className={`scene-object island-object record-island ${selected === entry.id ? "is-selected" : ""}`}
+              style={{ left: x, top: y }}
               onPointerDown={(e) => e.stopPropagation()}
               onClick={() => focus(x, y, entry.id)}
             >
-              <i />
+              <i className={`sprite sprite-${s}`} />
               <span>{entry.title}</span>
-              <small>Verified record · {entry.category}</small>
+              <small>Finalised GenLayer record</small>
             </button>
           ))}
         </div>
+        <div
+          className="depth-plane foreground-clouds"
+          style={{ transform: tr(1.13) }}
+        />
         {hint && (
           <div className="gesture-hint">
-            <Compass /> Drag to roam · scroll or pinch to zoom
+            <Compass />
+            Drag · zoom at pointer · pinch
           </div>
         )}
         <div className="camera-tools">
           <button
-            onClick={() => setScale(camera.scale + 0.18)}
+            onClick={(e) => zoomAt(cam.scale + 0.18, e.clientX, e.clientY)}
             aria-label="Zoom in"
           >
             <Plus />
           </button>
           <button
-            onClick={() => setScale(camera.scale - 0.18)}
+            onClick={(e) => zoomAt(cam.scale - 0.18, e.clientX, e.clientY)}
             aria-label="Zoom out"
           >
             <Minus />
           </button>
           <button
-            onClick={() => setCamera({ x: 0, y: 0, scale: 1 })}
+            onClick={() => setCam({ x: 0, y: 0, scale: 1 })}
             aria-label="Reset camera"
           >
             <LocateFixed />
           </button>
         </div>
         <button
-          className="minimap"
-          onClick={() => setCamera({ x: 0, y: 0, scale: 1 })}
+          className="minimap live-minimap"
+          onClick={() => setCam({ x: 0, y: 0, scale: 1 })}
           aria-label="Reset atlas camera"
         >
-          <img src="/atlas-world.jpg" alt="" />
+          {islands.map((o) => (
+            <i
+              key={o[0]}
+              style={{
+                left: `${(o[1] / WORLD.w) * 100}%`,
+                top: `${(o[2] / WORLD.h) * 100}%`,
+              }}
+            />
+          ))}
           <span
             style={{
-              transform: `translate(${-camera.x / 18}px,${-camera.y / 14}px) scale(${1 / camera.scale})`,
+              width: `${Math.min(92, 100 / cam.scale)}%`,
+              height: `${Math.min(88, 100 / cam.scale)}%`,
+              transform: `translate(calc(-50% + ${-cam.x / 18}px),calc(-50% + ${-cam.y / 14}px))`,
             }}
           />
         </button>
@@ -214,17 +234,15 @@ export function AtlasWorld({
           <div>
             <strong>
               {loading
-                ? "Reading the registry…"
+                ? "Reading registry…"
                 : error
-                  ? "Registry signal interrupted"
-                  : `${accepted.length} verified ${accepted.length === 1 ? "artefact" : "artefacts"}`}
+                  ? "Registry interrupted"
+                  : `${accepted.length} verified artefacts`}
             </strong>
-            <small>
-              Scenery is interpretive. Bright beacons are finalised records.
-            </small>
+            <small>Only luminous record islands are finalised.</small>
           </div>
         </div>
-        {!loading && !error && accepted.length === 0 && (
+        {!loading && !error && !accepted.length && (
           <p className="sr-only">
             The atlas is waiting for its first finalised record. Nothing has
             been staged for display.
@@ -242,7 +260,7 @@ export function AtlasWorld({
             <p>{record.historical_context}</p>
             <button
               className="enter-exhibit"
-              onClick={() => navigate(`/artefact/${record.id}`)}
+              onClick={() => nav(`/artefact/${record.id}`)}
             >
               Enter exhibit →
             </button>
