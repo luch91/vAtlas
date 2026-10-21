@@ -3,6 +3,10 @@ import { expect, test } from "@playwright/test";
 test("verified artefact journey and editorial discoveries work", async ({
   page,
 }) => {
+  test.skip(
+    !process.env.E2E_LIVE_RECORDS,
+    "requires the deployed authoritative registry",
+  );
   await page.goto("/");
   const record = page.getByRole("button", {
     name: /Dancing Baby.*Finalised GenLayer record/i,
