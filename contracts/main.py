@@ -1,11 +1,11 @@
 # { "Depends": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6" }
-"""Vanishing Atlas canonical registry, assessment rubric v1."""
+"""vAtlas canonical registry, assessment rubric v1."""
 from genlayer import *
 import hashlib
 import json
 from urllib.parse import urlparse
 
-ASSESSMENT_VERSION = "atlas-rubric-v1"
+ASSESSMENT_VERSION = "vatlas-rubric-v1"
 STATUSES = ("ACCEPTED", "REJECTED", "INCONCLUSIVE")
 CATEGORIES = ("community", "creative-work", "platform", "protocol", "ritual", "tool", "other")
 MAX_ENTRIES, MAX_EVIDENCE, MAX_PAGE, MAX_SOURCE_BYTES = 5000, 3, 25, 12000
@@ -113,7 +113,7 @@ def assessment_signature(value):
             "preservation_value", "accessible_sources", "total_sources")
     return canonical_json({key: value[key] for key in keys})
 
-class VanishingAtlasRegistry(gl.Contract):
+class VAtlasRegistry(gl.Contract):
     records: TreeMap[str, str]
     order: DynArray[str]
     accepted_order: DynArray[str]

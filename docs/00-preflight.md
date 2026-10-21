@@ -14,7 +14,7 @@ Status labels in this document mean exactly: **verified**, **partially verified*
 
 ## Live proof
 
-- Contract: `VanishingAtlasRegistry` (Checkpoint-A storage proof only).
+- Contract: `VAtlasRegistry` (the Checkpoint-A proof predates the vAtlas rebrand and remains historical only).
 - Studionet contract: `0x5fa6870E6AdD002140Cd60D6d9fb9EBf4E849d00`.
 - Deployment transaction: `0x4282515328e48cc87be77f05354f8b149c69a2be220fab8044748a27d43607a8`.
 - Deployment result: `FINALIZED`, `MAJORITY_AGREE`, leader execution `SUCCESS`; three validators agreed and two were cancelled after quorum.
@@ -45,7 +45,7 @@ This proof contract is not the production registry and does not contain the fina
 
 ## Cloudflare and GitHub
 
-- Active GitHub CLI identity: `luch91`; `luch91/vanishing-atlas` did not exist at preflight time.
+- Active GitHub CLI identity: `luch91`; `luch91/vAtlas` did not exist at preflight time (the repository was originally created under its pre-rebrand name).
 - Cloudflare Pages Git integration officially supports GitHub repositories, production branches, automatic push deployments and same-repository pull-request previews.
 - The deployment path must be Dashboard → Workers & Pages → Create application → Pages → Connect to Git. A Direct Upload project must not be created first because it cannot later be converted to Git integration.
 - Cloudflare account authentication and its GitHub App repository authorization are **blocked/unverified**: there is no usable Wrangler credential and browser automation could not open an authenticated dashboard session.

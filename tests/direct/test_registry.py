@@ -31,7 +31,7 @@ def test_valid_submission_and_pagination(direct_vm, direct_deploy, direct_alice)
     entry_id = contract.submit_entry(payload())
     record = json.loads(contract.get_entry(entry_id))
     assert record["assessment_status"] == "ACCEPTED"
-    assert record["assessment_version"] == "atlas-rubric-v1"
+    assert record["assessment_version"] == "vatlas-rubric-v1"
     page = json.loads(contract.list_entries(0, 10, True))
     assert [item["id"] for item in page["entries"]] == [entry_id]
     assert page["has_more"] is False
