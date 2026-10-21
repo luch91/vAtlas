@@ -5,7 +5,7 @@ Status: **incomplete — not submission ready**.
 - Project: vAtlas
 - Use case: an evidence-assessed public registry for culturally significant internet artefacts.
 - Repository: https://github.com/luch91/vAtlas
-- Cloudflare Pages URL: pending the vAtlas rebrand deployment
+- Cloudflare Pages URL: https://vatlas-eaa.pages.dev (assigned; production verification pending first build)
 - Functional contract address: `0x4ADfCb61534fc237E1C95988eA6B47eaD92aaa29`
 - Network: StudioNet development target, chain ID 61999
 - Contract deployment transaction: `0xeb070d21f05964b87d3f7d70e851d2010b4e454f302937317db52299acd1244a`
