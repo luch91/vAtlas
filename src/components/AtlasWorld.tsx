@@ -117,7 +117,7 @@ export function AtlasWorld({
     <section className="world-shell">
       <div className="world-title">
         <span>THE LIVING ARCHIPELAGO</span>
-        <h1>Explore what the web almost forgot.</h1>
+        <h1>Explore the old internet the web almost forgot.</h1>
       </div>
       <div
         ref={stage}
@@ -226,8 +226,8 @@ export function AtlasWorld({
         </div>
         {!loading && !error && accepted.length === 0 && (
           <p className="sr-only">
-            The atlas is waiting for its first finalised record. Nothing has been staged for
-            display.
+            The atlas is waiting for its first finalised record. Nothing has
+            been staged for display.
           </p>
         )}
         {record && (
