@@ -29,8 +29,8 @@ This proof contract is not the production registry and does not contain the fina
 
 1. Python contracts use `gl.Contract`, typed class-level storage, `@gl.public.view` and `@gl.public.write`.
 2. Persistent built-in `list`/`dict`/unbounded `int` are unsuitable; use `DynArray`, `TreeMap`, and sized integers. Custom stored dataclasses require `@allow_storage`.
-3. Current official network material lists Studionet, Studio-dev and Bradbury Phase 2. Asimov appears in older SDK/CLI material but was absent from the current live Networks page, so it is not selected.
-4. Studionet is stable hosted development but temporary. Bradbury is production-like and persistent, but the current live page does not publish a universal IC RPC; an official Phase-2 endpoint must be qualified before use.
+3. Active configuration uses StudioNet only. Asimov is retired, and obsolete pre-reset Bradbury endpoints are historical information only.
+4. Bradbury Phase 2 is in Epoch Zero until GenLayer explicitly announces builder access. Its Chain RPC and Intelligent Contract node RPC must be qualified separately; chain ID `4221` alone is insufficient and the official Phase 2 genesis hash must also match.
 5. Deploy with the network-aware CLI or `deployContract`; do not use a raw RPC flag for a built-in network.
 6. Reads use an account-free client and `readContract`; durable UI reads will request `LATEST_FINAL`. Writes use an EIP-1193 provider-backed client and `writeContract`.
 7. Track `waitForDecision`/`waitForFinalization` and inspect execution success. EVM inclusion, protocol acceptance, protocol finality, and application assessment are different states.

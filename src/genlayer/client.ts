@@ -2,6 +2,7 @@ import {createClient} from 'genlayer-js';
 import {studionet} from 'genlayer-js/chains';
 import {ExecutionResult,TransactionStatus} from 'genlayer-js/types';
 import type {PageResult,TxState} from '../types';
+import {feeError,prepareFees} from './fees';
 
 const rpc=import.meta.env.VITE_GENLAYER_RPC_URL||'https://studio.genlayer.com/api';
 export const chainId=Number(import.meta.env.VITE_GENLAYER_CHAIN_ID||61999);
@@ -46,9 +47,13 @@ export async function submitEntry(payload:Record<string,unknown>,onState:(state:
   const account=accounts[0] as `0x${string}`;
   const client=createClient({chain:studionet,endpoint:rpc,account,provider:window.ethereum});
   await client.connect('studionet');
-  const hash=await client.writeContract({address:contractAddress,functionName:'submit_entry',args:[`json:${JSON.stringify(payload)}`],value:0n});
+  const call={address:contractAddress,functionName:'submit_entry',args:[`json:${JSON.stringify(payload)}`],value:0n};
+  try {
+  const fees=await prepareFees(client as unknown as Parameters<typeof prepareFees>[0],window.ethereum,account,call,chainId);
+  const hash=await client.writeContract({...call,...(fees?{fees}: {})} as Parameters<typeof client.writeContract>[0]);
   onState('submitted',hash); onState('finalising',hash);
   const receipt=await client.waitForTransactionReceipt({hash,status:TransactionStatus.FINALIZED});
   if(receipt.txExecutionResultName!==ExecutionResult.FINISHED_WITH_RETURN) throw new Error(`Transaction finalized without a successful contract execution (${receipt.txExecutionResultName}).`);
   onState('finalised',hash); return hash as string;
+  } catch(error) { throw feeError(error); }
 }
