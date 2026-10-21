@@ -1,4 +1,4 @@
-# Vanishing Atlas
+# vAtlas
 
 An interactive museum of endangered internet culture, backed by a real GenLayer Intelligent Contract.
 

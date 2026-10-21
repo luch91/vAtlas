@@ -1,6 +1,6 @@
 # Contract interface v1
 
-Frontend methods are pinned to `VanishingAtlasRegistry` in `contracts/main.py`:
+Frontend methods are pinned to `VAtlasRegistry` in `contracts/main.py`:
 
 - `submit_entry(payload_json)` — signed write; atomically assesses and stores a record. Browser and CLI callers prefix the JSON string with `json:` to avoid CLI scalar coercion; unprefixed JSON remains accepted for compatibility.
 - `get_entry(entry_id)` — returns one JSON record.
