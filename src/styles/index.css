@@ -1244,7 +1244,7 @@ footer {
 .scene-object .sprite {
   position: absolute;
   inset: 0;
-  background: url("/atlas-objects.png") no-repeat;
+  background: url("/atlas-objects.webp") no-repeat;
   background-size: 300% 200%;
   pointer-events: none;
 }
